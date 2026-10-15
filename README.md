@@ -36,15 +36,11 @@ ecom-image-grabber/
 │       ├── image-to-png.js         图片 → PNG 转换（OffscreenCanvas 优先，回退 canvas）
 │       └── utils.js                通用工具：并发池、文件名净化、格式化
 ├── tests/
-│   └── pipeline-smoke-test.js      采集流水线冒烟测试（Node 中打桩 chrome API，39 项断言）
+│   └── pipeline-smoke-test.js      采集流水线冒烟测试（Node 中打桩 chrome API，40 项断言）
 └── docs/
-    ├── index.html                  产品官网（静态单页）
-    ├── assets/
-    │   ├── style.css               官网样式（含深色模式与响应式）
-    │   ├── main.js                 官网交互增强脚本
-    │   └── icon.png                官网使用的产品图标
-    ├── screenshots/                官网与 README 引用的界面截图
-    └── 平台适配规则.md              各平台 URL/CDN/DOM/iframe/坑位对照表与探测脚本
+    ├── 平台适配规则.md              各平台 URL/CDN/DOM/iframe/坑位对照表与探测脚本
+    ├── screenshots/                界面截图（README 引用）
+    └── index.html                  产品官网（静态单页）
 ```
 
 ## 安装
@@ -73,25 +69,6 @@ ecom-image-grabber/
 ![结果页](docs/screenshots/result-page.png)
 
 ![选中与下载进度](docs/screenshots/selected-and-progress.png)
-
-不安装扩展也能看结果页长什么样：用 Chrome 直接打开 `src/gallery/preview.html`（内部用桩数据模拟 `chrome.*` API，不需要加载扩展）。
-
-## 产品官网
-
-项目自带一个静态官网，位于 `docs/`，用于介绍产品、展示核心功能与安装步骤，可直接部署到 GitHub Pages。
-
-![官网首屏](docs/screenshots/website-desktop.png)
-
-- **本地预览**：直接双击打开 `docs/index.html` 即可，无需构建与服务器；也可以 `npx serve docs` 之类的方式起一个静态服务。
-- **在线部署**：把仓库推送到 GitHub 后，进入 Settings → Pages，将 Source 设为 `Deploy from a branch`，分支选择 `main`、目录选择 `/docs`，保存后访问 Pages 给出的地址即可。
-- **无外部依赖**：整站只有 HTML / CSS / 原生 JS，不加载任何 CDN、外部字体或第三方脚本，离线也能完整显示。
-
-官网自身的验收情况（用无头 Chrome 在真实视口下渲染核对）：
-
-- 1440 / 1024 / 768 / 375 四种宽度下 `document.scrollWidth === window.innerWidth`，无横向溢出；额外补测 375px 手机视口（通过 iframe 精确控制视口宽度）同样无溢出
-- 页面请求全部为本地文件，外部资源数为 0
-- 深色模式配色单独渲染核对，正文与强调色对比度正常
-- 禁用 JavaScript 时正文完整可读：入场动画的初始隐藏态只在 `html.js` 类存在时生效，脚本不执行时该类不会被添加
 
 ## 工作原理
 
@@ -163,4 +140,4 @@ PNG 是无损格式，同一张图转 PNG 后通常比原 JPG/WEBP 大很多（�
 node tests/pipeline-smoke-test.js
 ```
 
-该脚本在 Node 中打桩 `chrome` API 后加载真实的 Service Worker，验证缩略图还原、详情页识别、非商品图过滤、跨 frame 汇总、去重与 session storage 落库等 39 项行为。
+该脚本在 Node 中打桩 `chrome` API 后加载真实的 Service Worker，验证缩略图还原、详情页识别、非商品图过滤、跨 frame 汇总、去重与 session storage 落库等 40 项行为。
