@@ -252,7 +252,7 @@
           <li class="step reveal">
             <span class="step-num">1</span>
             <h3>下载并解压</h3>
-            <p>点下面的按钮下载扩展压缩包，解压后得到 <code>ecom-image-grabber</code> 文件夹，无需编译。</p>
+            <p>点下面的按钮下载压缩包，解压后得到 <code>ecom-image-grabber</code> 文件夹，无需编译。</p>
             <p class="code-row">
               <a class="btn btn-primary btn-sm" href="download/ecom-image-grabber-v1.0.1.zip" download>
                 <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -266,28 +266,41 @@
           <li class="step reveal">
             <span class="step-num">2</span>
             <h3>打开扩展管理页</h3>
-            <p>在地址栏进入扩展管理页，并打开右上角的「开发者模式」。</p>
+            <p>在地址栏输入下面的地址，并把页面右上角的「开发者模式」开关打开。</p>
             <p class="code-row"><code class="code copyable" data-copy="chrome://extensions/" title="点击复制">chrome://extensions/</code></p>
           </li>
 
           <li class="step reveal">
             <span class="step-num">3</span>
-            <h3>加载已解压的扩展程序</h3>
-            <p>点击左上角「加载已解压的扩展程序」，选中上一步解压出来的扩展根目录。</p>
+            <h3>加载该文件夹</h3>
+            <p>点左上角的「加载未打包的扩展程序」，在弹出的选择框里选中第 1 步解压出来的文件夹。</p>
+            <p class="step-tip">
+              要选到「里面直接有 <code>manifest.json</code>」的那一层，也就是 <code>ecom-image-grabber</code> 文件夹本身；直接选中 .zip 文件会报错。旧版 Chrome 里这个按钮叫「加载已解压的扩展程序」。
+            </p>
           </li>
 
           <li class="step reveal">
             <span class="step-num">4</span>
             <h3>在商品详情页验证</h3>
-            <p>打开任意商品详情页，右下角出现「获取图片」悬浮按钮即安装成功。</p>
+            <p>打开任意商品详情页（商品搜索列表页不算），右下角出现「获取图片」悬浮按钮即安装成功。</p>
+            <p class="step-tip">按钮没出现就先按 F5 刷新页面：内容脚本只在安装之后新加载的页面上生效。</p>
           </li>
         </ol>
+
+        <div class="install-help reveal">
+          <h3>装不上？先核对这三条</h3>
+          <ul>
+            <li>提示「<b>清单文件缺失或不可读</b>」：选错层级了，要选到里面直接有 <code>manifest.json</code> 的那一层</li>
+            <li>在弹窗里找不到文件夹：把文件夹的完整路径粘贴到对话框的地址栏里回车，比一层层点开快</li>
+            <li>加载成功但工具栏没有图标：在扩展管理页点该扩展的「详情」，打开「固定到工具栏」</li>
+          </ul>
+        </div>
 
         <p class="note reveal">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/>
           </svg>
-          需要 Chrome 116 及以上版本。下载的是扩展源码包而非安装程序，Chrome 扩展需按上面的步骤以「加载已解压的扩展程序」方式载入。扩展使用 Manifest V3，权限仅包含 downloads、storage、tabs 与 declarativeNetRequestWithHostAccess，不申请与功能无关的权限。
+          需要 Chrome 116 及以上版本。下载的是扩展源码包而非安装程序，Chrome 扩展需按上面的步骤以「加载未打包的扩展程序」方式载入。扩展使用 Manifest V3，权限仅包含 downloads、storage、tabs 与 declarativeNetRequestWithHostAccess，不申请与功能无关的权限。
         </p>
       </div>
     </section>
