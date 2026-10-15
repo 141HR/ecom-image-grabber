@@ -8,7 +8,7 @@
 - **覆盖全来源**：`<img>`（含 `currentSrc`）、`srcset` 最高清项、各类懒加载属性、CSS `background-image`、`<picture>`、图片链接、页面内嵌 JSON 中的图片地址
 - **跨 frame 汇总**：详情长图所在的 iframe（含嵌套）会被递归采集并汇总到一次结果里
 - **自动还原原图**：剥离各平台的缩略图尺寸后缀，把 `_430x430q90.jpg`、`/n5/jfs/...` 这类地址还原成原图地址
-- **清洗去重**：过滤图标/logo/占位图/静态资源，同图不同尺寸只保留最清晰的一张
+- **清洗去重**：过滤图标/logo/占位图/静态资源；结果页再按图片真实尺寸隐藏角标、按钮这类小图；同图不同尺寸只保留最清晰的一张
 - **结果页选择**：单张勾选、全选/反选/清空、选前 N 张、按域名与尺寸筛选、按链接关键字搜索、移除误抓图片
 - **预览**：双击卡片或点放大镜查看大图，支持 ← / → 切换、Esc 关闭
 - **PNG 批量下载**：并发转换与下载、进度显示、失败项列出原因并可一键重试
@@ -66,11 +66,15 @@ ecom-image-grabber/
 
 ## 界面预览
 
-不安装扩展也能看结果页长什么样：用 Chrome 直接打开 `src/gallery/preview.html`（内部用桩数据模拟 `chrome.*` API，不需要加载扩展）。
+以下截图来自**真实运行环境**：本机 Chrome 加载扩展后打开京东商品详情页（`item.m.jd.com/product/100012043978.html`），点击「获取图片」完成采集与下载，未做任何内容伪造。
+
+![商品详情页上的获取图片按钮](docs/screenshots/detail-page-button.png)
 
 ![结果页](docs/screenshots/result-page.png)
 
 ![选中与下载进度](docs/screenshots/selected-and-progress.png)
+
+不安装扩展也能看结果页长什么样：用 Chrome 直接打开 `src/gallery/preview.html`（内部用桩数据模拟 `chrome.*` API，不需要加载扩展）。
 
 ## 产品官网
 

@@ -65,8 +65,8 @@
 
         <div class="hero-shot reveal">
           <img src="screenshots/result-page.png"
-               alt="插件结果页：网格展示抓取到的商品图片，每张图片可勾选、查看尺寸与图床域名，顶部提供筛选与批量下载"
-               width="1500" height="880" fetchpriority="high">
+               alt="在京东商品详情页使用插件后的结果页：真实采集到 55 张候选，自动隐藏 44 张角标小图，剩余图片可勾选、查看真实尺寸与图床域名"
+               width="1500" height="950" fetchpriority="high">
         </div>
       </div>
     </section>
@@ -154,7 +154,7 @@
               </svg>
             </span>
             <h3>去重与清洗</h3>
-            <p>过滤图标、logo、占位图与静态资源域名，宽高都小于 120px 的图片直接丢弃，同一张图的不同尺寸只保留最清晰的一张。</p>
+            <p>过滤图标、logo、占位图与静态资源域名；结果页再按图片加载后的真实尺寸隐藏角标、按钮这类小图；同一张图的不同尺寸只保留最清晰的一张。</p>
           </article>
 
           <article class="feature-card reveal">
@@ -184,9 +184,9 @@
         </div>
 
         <figure class="showcase reveal">
-          <img src="screenshots/selected-and-progress.png" loading="lazy" width="1500" height="880"
-               alt="结果页全选 12 张图片后的状态：卡片带选中标记，顶部显示下载进度、已保存体积与失败项及一键重试按钮">
-          <figcaption>全选后开始下载：实时进度、已保存体积与失败原因一目了然，失败项可单独重试。</figcaption>
+          <img src="screenshots/selected-and-progress.png" loading="lazy" width="1500" height="950"
+               alt="结果页选中 6 张图片并下载完成后的状态：卡片带选中标记，顶部显示成功张数、已保存体积与失败项重试入口">
+          <figcaption>选中后开始下载：实时显示成功张数与已保存体积，失败项会列出原因并可单独重试。</figcaption>
         </figure>
       </div>
     </section>
@@ -315,6 +315,12 @@
             <p>点「下载选中」，文件保存到下载目录的 <code>电商图片/</code> 子目录，命名为 <code>前缀_01.png</code>。</p>
           </li>
         </ol>
+
+        <figure class="step-shot reveal">
+          <img src="screenshots/detail-page-button.png" loading="lazy" width="860" height="1800"
+               alt="京东商品详情页右下角的「获取图片」悬浮按钮，不遮挡页面底部的购买与客服入口">
+          <figcaption>按钮固定在详情页右下角，不遮挡购买按钮与客服入口。</figcaption>
+        </figure>
       </div>
     </section>
 
@@ -387,7 +393,7 @@
       <div class="footer-brand">
         <img src="assets/icon.png" alt="" width="28" height="28">
         <span>电商图片提取下载器</span>
-        <span class="tag">v1.0.0</span>
+        <span class="tag">v1.0.1</span>
       </div>
       <ul class="footer-tags">
         <li>Manifest V3</li>

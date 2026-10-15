@@ -139,6 +139,9 @@ function section(title) { console.log('\n' + title); }
       { url: 'https://img.alicdn.com/imgextra/i1/123/logo_new.png', source: 'img', width: 400, height: 400 },
       { url: 'data:image/png;base64,AAA', source: 'img' },
       { url: '//img.alicdn.com/imgextra/i2/999/B1.png', source: 'background' },
+      { url: 'https://img.alicdn.com/imgextra/i1/123/promo_badge.png', source: 'img', width: 200, height: 160 },
+      { url: 'https://img.alicdn.com/imgextra/i1/123/discount_strip.png', source: 'img', width: 285, height: 48 },
+      { url: 'https://img.alicdn.com/imgextra/i1/123/brand_mark.png', source: 'img', width: 300, height: 300 },
       { url: 'https://cdn.example.com/some/pic.png', source: 'img', width: 0, height: 0 },
       { url: 'https://cdn.example.com/some/big.png', source: 'img', width: 600, height: 600 }
     ]
@@ -156,7 +159,7 @@ function section(title) { console.log('\n' + title); }
 
   const result = await started;
   check('返回抓取成功', result.ok, true);
-  check('最终保留 4 张', result.count, 4);
+  check('最终保留 5 张', result.count, 5);
   check('已打开结果页', /src\/gallery\/gallery\.html$/.test(createdTab || ''), true);
   check('新窗口协议为扩展页', (createdTab || '').indexOf('chrome-extension://') === 0, true);
 
@@ -167,10 +170,12 @@ function section(title) { console.log('\n' + title); }
   check('丢弃：黑名单 2 张', collection.stats.dropped.blacklist, 2);
   check('丢弃：非法/base64 1 张', collection.stats.dropped.invalid, 1);
   check('丢弃：非白名单域名且尺寸未知 1 张', collection.stats.dropped.offCdn, 1);
+  check('丢弃：最小边不足 200px 的角标 2 张', collection.stats.dropped.small, 2);
   check('跨 2 个 frame 汇总', collection.stats.frames, 2);
   check('保留顺序与 URL 正确', collection.items.map((i) => i.url), [
     'https://img.alicdn.com/imgextra/i1/123/O1CN01a.jpg',
     'https://img.alicdn.com/imgextra/i2/999/B1.png',
+    'https://img.alicdn.com/imgextra/i1/123/brand_mark.png',
     'https://cdn.example.com/some/big.png',
     'https://img.alicdn.com/imgextra/i3/123/detail1.jpg'
   ]);

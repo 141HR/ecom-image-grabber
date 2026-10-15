@@ -13,7 +13,7 @@ const LAST_KEY = 'eig:lastCollectionId';
 const FRAME_QUIET_MS = 1200;      // 最后一个 frame 回传后再等这么久
 const COLLECT_TIMEOUT_MS = 12000; // 单次采集的硬上限
 const MAX_COLLECTIONS = 5;        // session storage 中保留的历史结果数
-const MIN_EDGE = 120;             // 两个方向都小于该值的图片视为图标类
+const MIN_EDGE = 200;             // 最小边小于该值的图片视为图标 / 角标 / 按钮
 const NON_CDN_MIN_EDGE = 200;     // 非平台图床的图片，需至少一边达到该尺寸
 
 /** collectId -> { ... } */
@@ -138,7 +138,8 @@ function buildCollection(session) {
 
     const width = raw.width || 0;
     const height = raw.height || 0;
-    if (width && height && width < MIN_EDGE && height < MIN_EDGE) { stats.dropped.small++; continue; }
+    // 角标、图标、按钮普遍是"细长条"或小图：只要最短边不达标就丢弃
+    if (width && height && Math.min(width, height) < MIN_EDGE) { stats.dropped.small++; continue; }
 
     const inCdn = P.isCdnHost(platform, host);
     if (!inCdn && !(width >= NON_CDN_MIN_EDGE || height >= NON_CDN_MIN_EDGE)) {

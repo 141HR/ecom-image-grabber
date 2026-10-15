@@ -12,11 +12,12 @@
   const LAST_KEY = 'eig:lastCollectionId';
   const SETTINGS_KEY = 'eig:settings';
   const RENDER_CHUNK = 120;
+  const HIDE_SMALL_EDGE = 200;   // 最短边小于该值的图片视为角标 / 图标 / 按钮
 
   const IDS = [
     'title', 'meta', 'prefix', 'concurrency', 'download',
     'select-all', 'invert', 'select-none', 'first-count', 'select-first',
-    'filter-host', 'filter-size', 'search', 'stats', 'auto-scroll',
+    'filter-host', 'filter-size', 'search', 'stats', 'auto-scroll', 'hide-small',
     'progress', 'progress-text', 'progress-size', 'bar-fill',
     'failures', 'failure-title', 'retry', 'failure-list', 'grid', 'empty',
     'lightbox', 'lb-close', 'lb-prev', 'lb-next', 'lb-img', 'lb-index', 'lb-info',
@@ -31,12 +32,13 @@
     selected: new Set(),
     removed: new Set(),
     filters: { host: 'all', minSize: 0, keyword: '' },
-    settings: { prefix: '', concurrency: 4, autoScroll: false },
+    settings: { prefix: '', concurrency: 4, autoScroll: false, hideSmall: true },
     downloading: false,
     objectUrls: new Set(),
     failures: [],
     lightboxIndex: -1,
-    observer: null
+    observer: null,
+    byId: new Map()
   };
 
   // ------------------------------------------------------------------ 初始化
@@ -50,7 +52,7 @@
     try {
       const data = await chrome.storage.local.get(SETTINGS_KEY);
       const saved = (data && data[SETTINGS_KEY]) || {};
-      state.settings = Object.assign({ prefix: '', concurrency: 4, autoScroll: false }, saved);
+      state.settings = Object.assign({ prefix: '', concurrency: 4, autoScroll: false, hideSmall: true }, saved);
     } catch (e) { /* 使用默认值 */ }
   }
 
@@ -73,6 +75,7 @@
 
     state.collection = collection;
     state.items = Array.isArray(collection.items) ? collection.items.slice() : [];
+    state.byId = new Map(state.items.map(function (it) { return [it.id, it]; }));
     state.selected = new Set();
     state.removed = new Set();
     state.failures = [];
@@ -122,15 +125,43 @@
   }
 
   // ------------------------------------------------------------------ 渲染
+  /**
+   * 图片尺寸：优先用采集阶段量到的尺寸，其次用结果页图片加载后量到的真实尺寸。
+   * 页面里通过源码正则 / 背景图拿到的候选往往没有尺寸，只能在这里补测。
+   */
+  function itemEdge(item) {
+    const w = item.width || item.measuredW || 0;
+    const h = item.height || item.measuredH || 0;
+    if (!w || !h) return { known: false, minEdge: 0, maxEdge: 0 };
+    return { known: true, minEdge: Math.min(w, h), maxEdge: Math.max(w, h) };
+  }
+
+  function hiddenSmallCount() {
+    if (!state.settings.hideSmall) return 0;
+    let n = 0;
+    state.items.forEach(function (it) {
+      if (state.removed.has(it.id)) return;
+      const size = itemEdge(it);
+      if (size.known && size.minEdge < HIDE_SMALL_EDGE) n++;
+    });
+    return n;
+  }
+
+  /** 图片加载完、拿到真实尺寸后，如果发现是小图就重新过滤一次列表 */
+  const schedulePrune = utils.debounce(function () {
+    if (!state.settings.hideSmall) return;
+    if (!hiddenSmallCount()) return;
+    applyFilters();
+  }, 500);
+
   function applyFilters() {
     const f = state.filters;
     state.filtered = state.items.filter(function (it) {
       if (state.removed.has(it.id)) return false;
+      const size = itemEdge(it);
+      if (state.settings.hideSmall && size.known && size.minEdge < HIDE_SMALL_EDGE) return false;
       if (f.host !== 'all' && it.host !== f.host) return false;
-      if (f.minSize) {
-        const edge = Math.max(it.width || 0, it.height || 0, U.guessSize(it.url).w);
-        if (edge && edge < f.minSize) return false;
-      }
+      if (f.minSize && size.known && size.maxEdge < f.minSize) return false;
       if (f.keyword && it.url.toLowerCase().indexOf(f.keyword) === -1) return false;
       return true;
     });
@@ -198,8 +229,17 @@
     if (!img || img.dataset.loaded) return;
     img.dataset.loaded = '1';
     const url = img.dataset.src;
+    const item = state.byId.get(card.dataset.id);
 
-    img.onload = function () { img.classList.remove('pending'); };
+    img.onload = function () {
+      img.classList.remove('pending');
+      if (!item || !img.naturalWidth) return;
+      item.measuredW = img.naturalWidth;
+      item.measuredH = img.naturalHeight;
+      const badge = card.querySelector('.badge');
+      if (badge && !item.width) badge.textContent = img.naturalWidth + '×' + img.naturalHeight;
+      schedulePrune();
+    };
     img.onerror = async function () {
       try {
         const blob = await fetchViaProxy(url);
@@ -224,8 +264,11 @@
   }
 
   function updateStats() {
-    el.stats.textContent = '显示 ' + state.filtered.length + ' / 共 ' + state.items.length +
+    let text = '显示 ' + state.filtered.length + ' / 共 ' + state.items.length +
       ' 张 · 已选 ' + state.selected.size + ' 张';
+    const hidden = hiddenSmallCount();
+    if (hidden) text += ' · 已隐藏 ' + hidden + ' 张小图';
+    el.stats.textContent = text;
     el.download.textContent = '下载选中 (' + state.selected.size + ')';
     el.download.disabled = state.selected.size === 0 || state.downloading;
   }
@@ -517,6 +560,11 @@
       state.settings.autoScroll = el['auto-scroll'].checked;
       saveSettings();
     });
+    el['hide-small'].addEventListener('change', function () {
+      state.settings.hideSmall = el['hide-small'].checked;
+      saveSettings();
+      applyFilters();
+    });
     el.prefix.addEventListener('change', function () {
       state.settings.prefix = el.prefix.value.trim();
       saveSettings();
@@ -582,6 +630,7 @@
     el.prefix.value = state.settings.prefix || '';
     el.concurrency.value = String(state.settings.concurrency || 4);
     el['auto-scroll'].checked = !!state.settings.autoScroll;
+    el['hide-small'].checked = state.settings.hideSmall !== false;
 
     let loaded = false;
     try {
