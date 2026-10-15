@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>电商图片提取下载器 · 一键提取商品详情页图片并批量下载为 PNG</title>
+  <meta name="description" content="Chrome 扩展：在淘宝 / 天猫、京东、拼多多的商品详情页一键提取全部商品图片，跨 iframe 采集详情长图，自动还原高清原图并去重，勾选后批量下载为 PNG。纯本地处理，不上报数据。">
+  <meta name="theme-color" content="#ff5000">
+  <link rel="icon" href="assets/icon.png">
+  <link rel="stylesheet" href="assets/style.css">
+  <script>document.documentElement.classList.add('js');</script>
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到主要内容</a>
+
+  <header class="site-header" id="top">
+    <div class="container header-inner">
+      <a class="brand" href="#top">
+        <img class="brand-icon" src="assets/icon.png" alt="" width="32" height="32">
+        <span class="brand-name">电商图片提取下载器</span>
+      </a>
+
+      <nav class="nav" id="nav" aria-label="主导航">
+        <a href="#intro">产品介绍</a>
+        <a href="#features">核心功能</a>
+        <a href="#platforms">支持平台</a>
+        <a href="#install">安装步骤</a>
+        <a href="#faq">常见问题</a>
+      </nav>
+
+      <div class="header-actions">
+        <a class="btn btn-primary btn-sm" href="#install">立即安装</a>
+        <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="nav" aria-label="展开导航菜单">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ============================ 首屏 ============================ -->
+    <section class="hero">
+      <div class="container hero-inner">
+        <div class="hero-copy reveal">
+          <p class="eyebrow">Chrome 扩展 · Manifest V3</p>
+          <h1>一键提取商品详情页的<span class="accent-text">全部图片</span></h1>
+          <p class="lead">
+            在淘宝 / 天猫、京东、拼多多的商品详情页点一下，跨 iframe 采集主图与详情长图，
+            自动剥离缩略图后缀还原高清原图，勾选你需要的图片，批量下载为 PNG。
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#install">查看安装步骤</a>
+            <a class="btn btn-ghost" href="#features">了解功能</a>
+          </div>
+          <ul class="stats">
+            <li><strong>3</strong><span>平台深度适配</span></li>
+            <li><strong>18</strong><span>项懒加载属性识别</span></li>
+            <li><strong>100%</strong><span>本地处理，不上报数据</span></li>
+          </ul>
+        </div>
+
+        <div class="hero-shot reveal">
+          <img src="screenshots/result-page.png"
+               alt="插件结果页：网格展示抓取到的商品图片，每张图片可勾选、查看尺寸与图床域名，顶部提供筛选与批量下载"
+               width="1500" height="880" fetchpriority="high">
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ 产品介绍 ============================ -->
+    <section class="section" id="intro">
+      <div class="container">
+        <div class="section-head reveal">
+          <h2>详情页的图片，从来都不好拿</h2>
+          <p>主图要逐张右键另存，详情长图藏在 iframe 里根本点不到，存下来的还常常是 50×50 的缩略图。</p>
+        </div>
+
+        <div class="compare">
+          <article class="compare-card compare-card--pain reveal">
+            <h3>手动收集的麻烦</h3>
+            <ul class="check-list check-list--muted">
+              <li>每张图都要右键「图片另存为」，几十张图就是几十次重复操作</li>
+              <li>详情长图在 <code>desc.alicdn.com</code>、<code>dx.3.cn</code> 这类 iframe 内，右键根本选不中</li>
+              <li>存下来的往往是列表页的缩略图地址，放大后模糊</li>
+              <li>结果里混着 logo、图标、二维码，需要一张张排除</li>
+            </ul>
+          </article>
+
+          <article class="compare-card compare-card--gain reveal">
+            <h3>插件的做法</h3>
+            <ul class="check-list">
+              <li>点一次按钮，主图、SKU 图、详情长图一次抓全</li>
+              <li>向页面内所有 frame 广播采集，iframe 里的图片同样汇总进结果</li>
+              <li>按平台规则剥离尺寸后缀，还原成原图地址再下载</li>
+              <li>按域名、路径与文件名关键词过滤非商品图，同一张图只保留最清晰的一份</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ 核心功能 ============================ -->
+    <section class="section section--alt" id="features">
+      <div class="container">
+        <div class="section-head reveal">
+          <h2>核心功能</h2>
+          <p>从采集到落盘，每一步都按电商详情页的真实结构设计。</p>
+        </div>
+
+        <div class="grid-3">
+          <article class="feature-card reveal">
+            <span class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9.5 2.5v2M3.6 3.6l1.4 1.4M2.5 9.5h2"/>
+                <path d="M10 12.5l9.5 3.6-4 1.6-1.6 4z"/>
+              </svg>
+            </span>
+            <h3>一键抓取</h3>
+            <p>详情页右下角悬浮按钮，点击即开始采集，不遮挡客服与购物车浮层。SPA 切换商品后按钮状态自动重置。</p>
+          </article>
+
+          <article class="feature-card reveal">
+            <span class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="12" height="12" rx="2"/>
+                <rect x="9" y="9" width="12" height="12" rx="2"/>
+              </svg>
+            </span>
+            <h3>跨 iframe 全量采集</h3>
+            <p>向页面内所有 frame 广播采集指令，识别 18 项懒加载属性、<code>srcset</code> 最高清项、CSS 背景图与页面内嵌 JSON 中的图片地址。</p>
+          </article>
+
+          <article class="feature-card reveal">
+            <span class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 9V6a2 2 0 0 1 2-2h3"/>
+                <path d="M15 4h3a2 2 0 0 1 2 2v3"/>
+                <path d="M20 15v3a2 2 0 0 1-2 2h-3"/>
+                <path d="M9 20H6a2 2 0 0 1-2-2v-3"/>
+              </svg>
+            </span>
+            <h3>自动还原原图</h3>
+            <p>剥离 <code>_430x430q90</code> 这类尺寸后缀，把 <code>/n5/jfs/</code> 归一化为 <code>/jfs/</code>，丢掉 <code>imageMogr2</code> 裁剪参数，拿到的是原图地址。</p>
+          </article>
+
+          <article class="feature-card reveal">
+            <span class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 5h16l-6.5 7.5V20l-3-1.6v-5.9z"/>
+              </svg>
+            </span>
+            <h3>去重与清洗</h3>
+            <p>过滤图标、logo、占位图与静态资源域名，宽高都小于 120px 的图片直接丢弃，同一张图的不同尺寸只保留最清晰的一张。</p>
+          </article>
+
+          <article class="feature-card reveal">
+            <span class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="8" height="8" rx="2"/>
+                <rect x="13" y="3" width="8" height="8" rx="2"/>
+                <rect x="3" y="13" width="8" height="8" rx="2"/>
+                <path d="M14 17l2 2 4-4.5"/>
+              </svg>
+            </span>
+            <h3>结果页勾选与预览</h3>
+            <p>新标签页网格展示，支持全选、反选、选前 N 张、按域名与尺寸筛选、关键字搜索，双击查看大图并可用方向键切换。</p>
+          </article>
+
+          <article class="feature-card reveal">
+            <span class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3v11"/>
+                <path d="M7.5 10L12 14.5 16.5 10"/>
+                <path d="M4.5 20h15"/>
+              </svg>
+            </span>
+            <h3>批量转 PNG 下载</h3>
+            <p>并发取图并转码为真正的 PNG，实时显示进度与体积，失败项标明原因（如防盗链）并可一键重试。</p>
+          </article>
+        </div>
+
+        <figure class="showcase reveal">
+          <img src="screenshots/selected-and-progress.png" loading="lazy" width="1500" height="880"
+               alt="结果页全选 12 张图片后的状态：卡片带选中标记，顶部显示下载进度、已保存体积与失败项及一键重试按钮">
+          <figcaption>全选后开始下载：实时进度、已保存体积与失败原因一目了然，失败项可单独重试。</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ============================ 支持平台 ============================ -->
+    <section class="section" id="platforms">
+      <div class="container">
+        <div class="section-head reveal">
+          <h2>支持的平台</h2>
+          <p>逐个平台适配了详情页结构、图床域名与缩略图规则，而不是套一层通用逻辑。</p>
+        </div>
+
+        <div class="grid-3">
+          <article class="platform-card reveal">
+            <div class="platform-head">
+              <span class="platform-badge platform-badge--taobao" aria-hidden="true">淘</span>
+              <h3>淘宝 / 天猫</h3>
+            </div>
+            <ul class="platform-list">
+              <li>识别 <code>item.taobao.com/item.htm</code> 与 <code>detail.tmall.com</code> 详情页</li>
+              <li>详情长图位于 <code>desc.alicdn.com</code> 等 iframe，跨 frame 汇总</li>
+              <li>剥离 <code>_430x430q90</code>、<code>_.webp</code> 等尺寸后缀还原原图</li>
+            </ul>
+          </article>
+
+          <article class="platform-card reveal">
+            <div class="platform-head">
+              <span class="platform-badge platform-badge--jd" aria-hidden="true">东</span>
+              <h3>京东</h3>
+            </div>
+            <ul class="platform-list">
+              <li>识别 <code>item.jd.com/&lt;sku&gt;.html</code> 详情页</li>
+              <li>描述图位于 <code>dx.3.cn</code> iframe，且使用 <code>data-lazyload</code> 懒加载</li>
+              <li>把 <code>/n5/jfs/</code>、<code>s450x450_jfs</code> 归一化为 <code>/jfs/</code> 原图路径</li>
+            </ul>
+          </article>
+
+          <article class="platform-card reveal">
+            <div class="platform-head">
+              <span class="platform-badge platform-badge--pdd" aria-hidden="true">拼</span>
+              <h3>拼多多（含商家版）</h3>
+            </div>
+            <ul class="platform-list">
+              <li>覆盖 <code>mobile.yangkeduo.com/goods.html</code> 前台商品页</li>
+              <li>适配商家版后台 <code>mms.pinduoduo.com/goods/</code> 页面</li>
+              <li>丢弃 <code>imageMogr2</code> 与 <code>_400x400</code> 等裁剪参数</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ 安装步骤 ============================ -->
+    <section class="section section--alt" id="install">
+      <div class="container">
+        <div class="section-head reveal">
+          <h2>安装步骤</h2>
+          <p>四步完成安装，无需上架商店，全过程不到一分钟。</p>
+        </div>
+
+        <ol class="steps">
+          <li class="step reveal">
+            <span class="step-num">1</span>
+            <h3>获取扩展文件夹</h3>
+            <p>把项目下载到本地并解压，得到扩展根目录。</p>
+            <p class="code-row"><code class="code" data-copy="ecom-image-grabber">ecom-image-grabber/</code></p>
+          </li>
+
+          <li class="step reveal">
+            <span class="step-num">2</span>
+            <h3>打开扩展管理页</h3>
+            <p>在地址栏进入扩展管理页，并打开右上角的「开发者模式」。</p>
+            <p class="code-row"><code class="code copyable" data-copy="chrome://extensions/" title="点击复制">chrome://extensions/</code></p>
+          </li>
+
+          <li class="step reveal">
+            <span class="step-num">3</span>
+            <h3>加载已解压的扩展程序</h3>
+            <p>点击左上角「加载已解压的扩展程序」，选中上一步解压出来的扩展根目录。</p>
+          </li>
+
+          <li class="step reveal">
+            <span class="step-num">4</span>
+            <h3>在商品详情页验证</h3>
+            <p>打开任意商品详情页，右下角出现「获取图片」悬浮按钮即安装成功。</p>
+          </li>
+        </ol>
+
+        <p class="note reveal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/>
+          </svg>
+          需要 Chrome 116 及以上版本。扩展使用 Manifest V3，权限仅包含 downloads、storage、tabs 与 declarativeNetRequestWithHostAccess，不申请与功能无关的权限。
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================ 使用流程 ============================ -->
+    <section class="section" id="usage">
+      <div class="container">
+        <div class="section-head reveal">
+          <h2>怎么用</h2>
+          <p>三步完成一次完整的图片提取与下载。</p>
+        </div>
+
+        <ol class="flow">
+          <li class="flow-item reveal">
+            <span class="flow-num">01</span>
+            <h3>点击获取图片</h3>
+            <p>在商品详情页右下角点「获取图片」，按钮会显示抓取中的状态。</p>
+          </li>
+          <li class="flow-arrow" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </li>
+          <li class="flow-item reveal">
+            <span class="flow-num">02</span>
+            <h3>在结果页勾选</h3>
+            <p>抓取完成会自动打开结果页，可全选、反选、筛选，或双击放大确认后再挑。</p>
+          </li>
+          <li class="flow-arrow" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </li>
+          <li class="flow-item reveal">
+            <span class="flow-num">03</span>
+            <h3>下载为 PNG</h3>
+            <p>点「下载选中」，文件保存到下载目录的 <code>电商图片/</code> 子目录，命名为 <code>前缀_01.png</code>。</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ============================ 常见问题 ============================ -->
+    <section class="section section--alt" id="faq">
+      <div class="container container--narrow">
+        <div class="section-head reveal">
+          <h2>常见问题</h2>
+          <p>先把容易踩的坑说清楚。</p>
+        </div>
+
+        <div class="faq reveal">
+          <details class="faq-item">
+            <summary>抓不到图片，或者只抓到很少几张怎么办？</summary>
+            <div class="faq-body">
+              <p>先回到结果页勾选工具栏里的「抓取前自动滚动加载」，它会先把页面滚到底触发懒加载，再重新抓取一次。如果仍然为空，请确认当前页面是商品详情页而不是列表页；若商品使用了店铺自有图床，需要把该域名加入扩展 manifest 的 host_permissions。</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary>下载失败，提示被拒绝或中断怎么办？</summary>
+            <div class="faq-body">
+              <p>这是图床的防盗链校验。插件已经内置三级降级：结果页直连取图、Service Worker 代理取图、以及通过 declarativeNetRequest 给该图片域名补 Referer 请求头。点失败项上方的「重试失败项」即可走完这套兜底链路；若依旧失败，通常是该图片地址已过期失效。</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary>为什么下载的 PNG 比原图大很多？</summary>
+            <div class="faq-body">
+              <p>PNG 是无损格式，同样一张商品图转成 PNG 后体积通常明显大于原 JPG 或 WEBP，详情长图可能达到十几 MB，这是格式特性而非异常。结果页会实时显示已保存体积；如果你更在意体积，可以把 <code>src/shared/image-to-png.js</code> 中的输出格式改为 <code>image/jpeg</code> 并配合质量参数。</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary>会把我的浏览数据上传到服务器吗？</summary>
+            <div class="faq-body">
+              <p>不会。抓取、清洗、图片转码全部在你的浏览器内完成，扩展不采集、不统计、不上报任何数据，也没有任何自建服务端。唯一的外部请求是向各平台的图床取回你选中的图片本身。</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary>支持 Edge 或其他浏览器吗？</summary>
+            <div class="faq-body">
+              <p>扩展基于 Manifest V3，理论上可在 Chromium 内核浏览器中使用，但目前只在 Chrome 116 及以上版本做过验证。Firefox 的扩展 API 与 MV3 实现存在差异，需要改造后才能使用。</p>
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary>平台改版后规则失效了怎么办？</summary>
+            <div class="faq-body">
+              <p>电商平台的 DOM 结构与图床地址会不定期调整。项目里的 <code>docs/平台适配规则.md</code> 记录了各平台的识别规则，并附有可直接在控制台执行的探测脚本：拿到新的图片域名、懒加载属性或地址形态后，补充到 <code>src/shared/platforms.js</code> 与 <code>collector.js</code> 即可恢复。</p>
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ 底部 CTA ============================ -->
+    <section class="cta">
+      <div class="container cta-inner reveal">
+        <h2>把详情页的图片，一次收齐</h2>
+        <p>装上扩展，在商品详情页点一下「获取图片」，剩下的交给结果页。</p>
+        <a class="btn btn-primary btn-lg" href="#install">立即安装</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <img src="assets/icon.png" alt="" width="28" height="28">
+        <span>电商图片提取下载器</span>
+        <span class="tag">v1.0.0</span>
+      </div>
+      <ul class="footer-tags">
+        <li>Manifest V3</li>
+        <li>原生 JavaScript</li>
+        <li>本地处理</li>
+      </ul>
+      <p class="footer-note">
+        本工具仅用于个人素材整理与管理。下载与使用图片时，请遵守各平台的用户协议与相关版权法规，未经授权不得用于商业用途。
+      </p>
+      <p class="footer-copy">© 2026 电商图片提取下载器 · 开源项目</p>
+    </div>
+  </footer>
+
+  <script src="assets/main.js" defer></script>
+</body>
+</html>

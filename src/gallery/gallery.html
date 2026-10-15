@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>图片提取结果</title>
+  <link rel="stylesheet" href="gallery.css">
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1 id="title">图片提取结果</h1>
+        <p class="meta" id="meta">正在读取抓取结果…</p>
+      </div>
+      <div class="topbar-right">
+        <label class="field">
+          <span>文件名前缀</span>
+          <input id="prefix" type="text" placeholder="商品图片" spellcheck="false">
+        </label>
+        <label class="field">
+          <span>并发</span>
+          <select id="concurrency">
+            <option value="2">2</option>
+            <option value="4" selected>4</option>
+            <option value="6">6</option>
+            <option value="8">8</option>
+          </select>
+        </label>
+        <button id="download" class="btn primary" disabled>下载选中 (0)</button>
+      </div>
+    </header>
+
+    <section class="toolbar">
+      <div class="toolbar-left">
+        <button class="chip" id="select-all">全选</button>
+        <button class="chip" id="invert">反选</button>
+        <button class="chip" id="select-none">清空选择</button>
+        <span class="sep"></span>
+        <span class="inline">
+          <input id="first-count" class="num" type="number" min="1" value="20">
+          <button class="chip" id="select-first">选前 N 张</button>
+        </span>
+        <span class="sep"></span>
+        <select id="filter-host" class="select" title="按图床域名筛选">
+          <option value="all">全部域名</option>
+        </select>
+        <select id="filter-size" class="select" title="按尺寸筛选">
+          <option value="0">不限尺寸</option>
+          <option value="400">≥ 400px</option>
+          <option value="800">≥ 800px</option>
+          <option value="1200">≥ 1200px</option>
+        </select>
+        <input id="search" class="search" type="search" placeholder="按链接关键字筛选" spellcheck="false">
+      </div>
+      <div class="toolbar-right">
+        <label class="switch" title="下次抓取前先自动滚动到底，触发懒加载">
+          <input type="checkbox" id="auto-scroll">
+          <span>抓取前自动滚动加载</span>
+        </label>
+        <span id="stats"></span>
+      </div>
+    </section>
+
+    <section id="progress" class="progress" hidden>
+      <div class="progress-head">
+        <span id="progress-text">准备中…</span>
+        <span id="progress-size"></span>
+      </div>
+      <div class="bar"><div class="bar-fill" id="bar-fill"></div></div>
+      <div id="failures" class="failures" hidden>
+        <div class="failures-head">
+          <strong id="failure-title">失败项</strong>
+          <button class="chip" id="retry">重试失败项</button>
+        </div>
+        <ul id="failure-list"></ul>
+      </div>
+    </section>
+
+    <main id="grid" class="grid"></main>
+
+    <div id="empty" class="empty" hidden>
+      <p class="empty-title">没有可下载的图片</p>
+      <p class="empty-sub">可能原因：当前页面不是商品详情页、图片需要滚动才会加载、或图片域名不在扩展授权范围内。</p>
+    </div>
+
+    <footer class="footer">
+      单击卡片选中 / 取消，双击卡片或点右下角放大镜查看大图。所有图片统一转换为 PNG 后保存，体积通常大于原图。
+    </footer>
+  </div>
+
+  <div id="lightbox" class="lightbox" hidden>
+    <button class="lb-close" id="lb-close" title="关闭（Esc）" type="button">✕</button>
+    <button class="lb-nav lb-prev" id="lb-prev" title="上一张（←）" type="button">‹</button>
+    <button class="lb-nav lb-next" id="lb-next" title="下一张（→）" type="button">›</button>
+    <figure class="lb-figure">
+      <img id="lb-img" alt="">
+      <figcaption>
+        <span id="lb-index" class="lb-index"></span>
+        <span id="lb-info" class="lb-info"></span>
+        <span class="lb-actions">
+          <button class="chip" id="lb-select" type="button">选中</button>
+          <button class="chip" id="lb-download" type="button">下载这一张</button>
+          <a id="lb-original" class="chip" href="#" target="_blank" rel="noreferrer">打开原图</a>
+        </span>
+      </figcaption>
+    </figure>
+  </div>
+
+  <script src="../shared/utils.js"></script>
+  <script src="../shared/url-utils.js"></script>
+  <script src="../shared/platforms.js"></script>
+  <script src="../shared/image-to-png.js"></script>
+  <script src="gallery.js"></script>
+</body>
+</html>

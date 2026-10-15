@@ -1,0 +1,66 @@
+{
+  "manifest_version": 3,
+  "name": "电商图片提取下载器",
+  "version": "1.0.0",
+  "description": "在淘宝/天猫、京东、拼多多商品详情页一键提取全部商品图片，勾选后批量下载为 PNG。",
+  "minimum_chrome_version": "116",
+  "permissions": [
+    "downloads",
+    "storage",
+    "tabs",
+    "declarativeNetRequestWithHostAccess"
+  ],
+  "host_permissions": [
+    "https://*.taobao.com/*",
+    "https://*.tmall.com/*",
+    "https://*.alicdn.com/*",
+    "https://*.taobaocdn.com/*",
+    "https://*.jd.com/*",
+    "https://*.jd.hk/*",
+    "https://*.360buyimg.com/*",
+    "https://*.3.cn/*",
+    "https://*.pinduoduo.com/*",
+    "https://*.yangkeduo.com/*",
+    "https://*.pddpic.com/*",
+    "https://*.pddimg.com/*",
+    "https://*.pinimg.com/*"
+  ],
+  "background": {
+    "service_worker": "src/background/service-worker.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.taobao.com/*",
+        "https://*.tmall.com/*",
+        "https://*.alicdn.com/*",
+        "https://*.taobaocdn.com/*",
+        "https://*.jd.com/*",
+        "https://*.jd.hk/*",
+        "https://*.360buyimg.com/*",
+        "https://*.3.cn/*",
+        "https://*.pinduoduo.com/*",
+        "https://*.yangkeduo.com/*"
+      ],
+      "js": [
+        "src/shared/utils.js",
+        "src/shared/url-utils.js",
+        "src/shared/platforms.js",
+        "src/content/collector.js",
+        "src/content/content.js"
+      ],
+      "run_at": "document_idle",
+      "all_frames": true,
+      "match_origin_as_fallback": true
+    }
+  ],
+  "action": {
+    "default_title": "电商图片提取下载器（打开上次抓取结果）"
+  },
+  "icons": {
+    "16": "assets/icon16.png",
+    "32": "assets/icon32.png",
+    "48": "assets/icon48.png",
+    "128": "assets/icon128.png"
+  }
+}
