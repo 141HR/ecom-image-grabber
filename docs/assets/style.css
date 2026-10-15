@@ -167,6 +167,7 @@ code {
 
 .btn-sm { min-height: 36px; padding: 0 14px; font-size: 14px; }
 .btn-lg { min-height: 52px; padding: 0 28px; font-size: 16px; }
+.btn-icon { width: 18px; height: 18px; flex: 0 0 auto; }
 
 /* ------------------------------------------------------------------ 顶栏 */
 
@@ -689,6 +690,16 @@ code {
   background: var(--surface);
   font-size: 12.5px;
 }
+
+.footer-github {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-sub);
+  font-size: 13.5px;
+}
+.footer-github:hover { color: var(--brand); text-decoration: none; }
+.footer-github svg { width: 16px; height: 16px; flex: 0 0 auto; }
 
 .footer-note { max-width: 620px; margin: 0; font-size: 13px; line-height: 1.7; }
 .footer-copy { margin: 0; font-size: 13px; }
