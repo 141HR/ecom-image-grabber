@@ -70,14 +70,15 @@ try {
 
   Write-Host "已提交：$commitSha" -ForegroundColor Green
   Write-Host "提交总数：$(gh api "$api/commits?per_page=100" --jq 'length')"
-  Write-Host "远程文件数：$(gh api "$api/git/trees/$branch?recursive=1" --jq '[.tree[] | select(.type=="blob")] | length')"
+  Write-Host "远程文件数：$(gh api "$api/git/trees/$commitSha`?recursive=1" --jq '[.tree[] | select(.type=="blob")] | length')"
   Write-Host "站点地址：https://$($owner.ToLower()).github.io/$repo/"
 
-  # 本地分支与远端历史无关时给出提示，避免后续 git 操作产生困惑
+  # 通过 API 创建提交时，本地仓库拿不到该提交对象（本机无法 fetch），这里如实说明
   $localHead = git rev-parse HEAD
   if ($localHead -ne $commitSha) {
-    Write-Host "提示：本地 HEAD（$($localHead.Substring(0,7))）与远端（$($commitSha.Substring(0,7))）不同。" -ForegroundColor Yellow
-    Write-Host "      本机无法 fetch，如需保持本地同步可执行：git reset --soft $commitSha" -ForegroundColor Yellow
+    Write-Host "提示：远端已更新到 $($commitSha.Substring(0,7))，本地 HEAD 为 $($localHead.Substring(0,7))。" -ForegroundColor Yellow
+    Write-Host "      提交对象只存在于 GitHub 侧，本机无法 fetch，因此本地历史与远端不互通；" -ForegroundColor Yellow
+    Write-Host "      网络恢复后可用 git fetch origin && git reset --soft origin/main 对齐。" -ForegroundColor Yellow
   }
 }
 finally {
