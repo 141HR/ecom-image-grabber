@@ -82,6 +82,14 @@ ecom-image-grabber/
 - **在线部署**：把仓库推送到 GitHub 后，进入 Settings → Pages，将 Source 设为 `Deploy from a branch`，分支选择 `main`、目录选择 `/docs`，保存后访问 Pages 给出的地址即可。
 - **无外部依赖**：整站只有 HTML / CSS / 原生 JS，不加载任何 CDN、外部字体或第三方脚本，离线也能完整显示。
 
+**更新已发布的站点**：如果本机无法直连 `github.com`（`git push` 报 `Connection was reset`，但 `api.github.com` 正常），用仓库内的脚本改走 GitHub API 提交，效果等同于一次普通推送：
+
+```powershell
+powershell -File scripts/publish-via-api.ps1
+```
+
+脚本会自动 `git add -A`、以远端最新提交为父提交创建一次提交，并推送后打印提交号与站点地址。若网络能正常访问 `github.com`，直接 `git push` 即可。
+
 官网自身的验收情况（用无头 Chrome 在真实视口下渲染核对）：
 
 - 1440 / 1024 / 768 / 375 四种宽度下 `document.scrollWidth === window.innerWidth`，无横向溢出；额外补测 375px 手机视口（通过 iframe 精确控制视口宽度）同样无溢出
