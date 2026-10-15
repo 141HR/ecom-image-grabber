@@ -150,20 +150,45 @@
   }
 
   /**
+   * 是否应当因为尺寸规则被排除。
+   * 两条规则都依赖"真实尺寸"：隐藏小图（最短边 < 200px）与用户设置的尺寸筛选；
+   * 采集阶段拿不到尺寸的图片会先留着，等图片加载出真实尺寸后再由 scheduleRefine 处理。
+   */
+  function failsSizeRule(item) {
+    const size = itemEdge(item);
+    if (!size.known) return false;
+    if (state.settings.hideSmall && size.minEdge < HIDE_SMALL_EDGE) return true;
+    if (state.filters.minSize && size.maxEdge < state.filters.minSize) return true;
+    return false;
+  }
+
+  /**
+   * 当前可见且被选中的数量。
+   * 选择状态可能包含已被移除或已被「隐藏小图」筛掉的图片，
+   * 而下载只会处理可见的那些，所以按钮上的数量必须按可见集合统计，否则会对不上。
+   */
+  function selectedVisibleCount() {
+    let n = 0;
+    state.filtered.forEach(function (it) {
+      if (state.selected.has(it.id)) n++;
+    });
+    return n;
+  }
+
+  /**
    * 图片加载完、拿到真实尺寸后，把判定为小图的卡片直接从网格里摘掉。
    *
    * 这里刻意不做整体重绘：重绘会让剩余卡片重新加载图片，重新触发尺寸判定，
    * 形成「重绘 → 重新加载 → 再重绘」的循环，表现为结果页持续闪烁。
    */
-  const schedulePrune = utils.debounce(function () {
-    if (!state.settings.hideSmall) return;
+  const scheduleRefine = utils.debounce(function () {
+    if (!state.settings.hideSmall && !state.filters.minSize) return;
     if (state.lightboxIndex >= 0) return;   // 预览打开时先不摘卡片，关闭后再处理
 
     let removed = 0;
     state.items.forEach(function (it) {
       if (state.removed.has(it.id) || state.prunedIds.has(it.id)) return;
-      const size = itemEdge(it);
-      if (!size.known || size.minEdge >= HIDE_SMALL_EDGE) return;
+      if (!failsSizeRule(it)) return;
 
       state.prunedIds.add(it.id);
       const pos = state.filtered.indexOf(it);
@@ -182,10 +207,8 @@
     const f = state.filters;
     state.filtered = state.items.filter(function (it) {
       if (state.removed.has(it.id)) return false;
-      const size = itemEdge(it);
-      if (state.settings.hideSmall && size.known && size.minEdge < HIDE_SMALL_EDGE) return false;
+      if (failsSizeRule(it)) return false;
       if (f.host !== 'all' && it.host !== f.host) return false;
-      if (f.minSize && size.known && size.maxEdge < f.minSize) return false;
       if (f.keyword && it.url.toLowerCase().indexOf(f.keyword) === -1) return false;
       return true;
     });
@@ -262,7 +285,7 @@
       item.measuredH = img.naturalHeight;
       const badge = card.querySelector('.badge');
       if (badge && !item.width) badge.textContent = img.naturalWidth + '×' + img.naturalHeight;
-      schedulePrune();
+      scheduleRefine();
     };
     img.onerror = async function () {
       try {
@@ -288,13 +311,16 @@
   }
 
   function updateStats() {
-    let text = '显示 ' + state.filtered.length + ' / 共 ' + state.items.length +
-      ' 张 · 已选 ' + state.selected.size + ' 张';
+    // 总数不含已被移除的图片，保证「显示 + 已隐藏 = 共」始终成立
+    const total = state.items.length - state.removed.size;
+    const selectedVisible = selectedVisibleCount();
+    let text = '显示 ' + state.filtered.length + ' / 共 ' + total +
+      ' 张 · 已选 ' + selectedVisible + ' 张';
     const hidden = hiddenSmallCount();
     if (hidden) text += ' · 已隐藏 ' + hidden + ' 张小图';
     el.stats.textContent = text;
-    el.download.textContent = '下载选中 (' + state.selected.size + ')';
-    el.download.disabled = state.selected.size === 0 || state.downloading;
+    el.download.textContent = '下载选中 (' + selectedVisible + ')';
+    el.download.disabled = selectedVisible === 0 || state.downloading;
   }
 
   // ------------------------------------------------------------------ 选择
@@ -374,7 +400,7 @@
     state.lightboxIndex = -1;
     el.lightbox.hidden = true;
     el['lb-img'].removeAttribute('src');
-    schedulePrune();   // 预览期间暂缓的小图清理在这里补上
+    scheduleRefine();   // 预览期间暂缓的小图清理在这里补上
   }
 
   function stepLightbox(delta) {

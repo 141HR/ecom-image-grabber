@@ -145,6 +145,10 @@
       const sessionStore = { 'eig:lastCollectionId': 'demo', 'eig:collection:demo': collection };
       const settings = { 'eig:settings': { prefix: '春季新款衬衫', concurrency: 4, autoScroll: true } };
 
+      // 下载桩：维护监听器列表，下载后回调 complete，否则预览页里点下载会一直等到超时
+      let dlSeq = 0;
+      let dlListeners = [];
+
       window.chrome = {
         storage: {
           session: {
@@ -173,8 +177,21 @@
           onMessage: { addListener: function () {} }
         },
         downloads: {
-          download: async function () { return 1; },
-          onChanged: { addListener: function () {}, removeListener: function () {} }
+          download: async function () {
+            const id = ++dlSeq;
+            setTimeout(function () {
+              dlListeners.forEach(function (fn) {
+                fn({ id: id, state: { current: 'complete' } });
+              });
+            }, 500);
+            return id;
+          },
+          onChanged: {
+            addListener: function (fn) { dlListeners.push(fn); },
+            removeListener: function (fn) {
+              dlListeners = dlListeners.filter(function (x) { return x !== fn; });
+            }
+          }
         }
       };
 
