@@ -1,15 +1,17 @@
 <#
-  在无法直连 github.com 的网络环境下发布更新。
+  通过 GitHub API 发布一次提交（git push 的备用通道）。
 
-  背景：本机到 github.com:443 的连接会被重置，`git push` 无法使用，
-  但 api.github.com 正常。此脚本改用 GitHub 的 Git Data API 创建一次提交，
-  效果等同于一次普通推送（保留远端历史，新提交以远端最新提交为父提交）。
+  适用场景：所在网络无法直连 github.com（git push 报 Connection was reset），
+  但 api.github.com 可访问。脚本调用 Git Data API 创建一次提交，
+  保留远端历史（新提交以远端最新提交为父提交），效果等同于一次普通推送。
 
   用法：
     powershell -File scripts/publish-via-api.ps1
 
   说明：脚本会先执行 `git add -A`，因此新增文件也会被包含；
   提交内容取自工作区当前状态，与本地 git 历史无关。
+
+  若 `git push` 可用，直接用 git 即可，无需本脚本。
 #>
 $ErrorActionPreference = 'Stop'
 
