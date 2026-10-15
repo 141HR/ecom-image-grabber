@@ -38,7 +38,8 @@
     failures: [],
     lightboxIndex: -1,
     observer: null,
-    byId: new Map()
+    byId: new Map(),
+    prunedIds: new Set()
   };
 
   // ------------------------------------------------------------------ 初始化
@@ -76,6 +77,7 @@
     state.collection = collection;
     state.items = Array.isArray(collection.items) ? collection.items.slice() : [];
     state.byId = new Map(state.items.map(function (it) { return [it.id, it]; }));
+    state.prunedIds = new Set();
     state.selected = new Set();
     state.removed = new Set();
     state.failures = [];
@@ -147,12 +149,34 @@
     return n;
   }
 
-  /** 图片加载完、拿到真实尺寸后，如果发现是小图就重新过滤一次列表 */
+  /**
+   * 图片加载完、拿到真实尺寸后，把判定为小图的卡片直接从网格里摘掉。
+   *
+   * 这里刻意不做整体重绘：重绘会让剩余卡片重新加载图片，重新触发尺寸判定，
+   * 形成「重绘 → 重新加载 → 再重绘」的循环，表现为结果页持续闪烁。
+   */
   const schedulePrune = utils.debounce(function () {
     if (!state.settings.hideSmall) return;
-    if (!hiddenSmallCount()) return;
-    applyFilters();
-  }, 500);
+    if (state.lightboxIndex >= 0) return;   // 预览打开时先不摘卡片，关闭后再处理
+
+    let removed = 0;
+    state.items.forEach(function (it) {
+      if (state.removed.has(it.id) || state.prunedIds.has(it.id)) return;
+      const size = itemEdge(it);
+      if (!size.known || size.minEdge >= HIDE_SMALL_EDGE) return;
+
+      state.prunedIds.add(it.id);
+      const pos = state.filtered.indexOf(it);
+      if (pos !== -1) state.filtered.splice(pos, 1);
+      const card = el.grid.querySelector('.card[data-id="' + it.id + '"]');
+      if (card && card.parentNode) card.parentNode.removeChild(card);
+      removed++;
+    });
+
+    if (!removed) return;
+    el['empty'].hidden = state.filtered.length > 0;
+    updateStats();
+  }, 400);
 
   function applyFilters() {
     const f = state.filters;
@@ -350,6 +374,7 @@
     state.lightboxIndex = -1;
     el.lightbox.hidden = true;
     el['lb-img'].removeAttribute('src');
+    schedulePrune();   // 预览期间暂缓的小图清理在这里补上
   }
 
   function stepLightbox(delta) {
